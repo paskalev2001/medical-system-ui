@@ -23,12 +23,24 @@ export function AppLayout() {
 
         <nav className="nav">
           <NavLink to="/">Dashboard</NavLink>
-          <NavLink to="/doctors">Doctors</NavLink>
-          <NavLink to="/patients">Patients</NavLink>
-          <NavLink to="/diagnoses">Diagnoses</NavLink>
-          <NavLink to="/examinations">Examinations</NavLink>
-          <NavLink to="/sick-leaves">Sick Leaves</NavLink>
-          <NavLink to="/reports">Reports</NavLink>
+
+          {(hasRole("ADMIN") || hasRole("DOCTOR")) && (
+            <>
+              <NavLink to="/doctors">Doctors</NavLink>
+              <NavLink to="/patients">Patients</NavLink>
+              <NavLink to="/diagnoses">Diagnoses</NavLink>
+              <NavLink to="/examinations">Examinations</NavLink>
+              <NavLink to="/sick-leaves">Sick Leaves</NavLink>
+              <NavLink to="/reports">Reports</NavLink>
+            </>
+          )}
+
+          {hasRole("PATIENT") && (
+            <>
+              <NavLink to="/examinations">My Examinations</NavLink>
+              <NavLink to="/sick-leaves">My Sick Leaves</NavLink>
+            </>
+          )}
 
           {hasRole("ADMIN") && <NavLink to="/admin/users">Admin Users</NavLink>}
         </nav>
