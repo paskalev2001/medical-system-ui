@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { http } from "../api/http";
 import { useAuth } from "../auth/AuthContext";
+import { getErrorMessage } from "../utils/error";
 
 const emptyForm = {
   uniqueIdentifier: "",
@@ -15,6 +16,7 @@ export function DoctorsPage() {
 
   const [doctors, setDoctors] = useState([]);
   const [form, setForm] = useState(emptyForm);
+  const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState("");
 
   async function loadDoctors() {
@@ -23,7 +25,9 @@ export function DoctorsPage() {
   }
 
   useEffect(() => {
-    loadDoctors().catch(() => setError("Could not load doctors."));
+    loadDoctors().catch((err) =>
+      setError(getErrorMessage(err, "Could not load doctors."))
+    );
   }, []);
 
   function handleChange(event) {
@@ -35,7 +39,25 @@ export function DoctorsPage() {
     }));
   }
 
-  async function handleCreate(event) {
+  function startCreate() {
+    setEditingId(null);
+    setForm(emptyForm);
+    setError("");
+  }
+
+  function startEdit(doctor) {
+    setEditingId(doctor.id);
+    setForm({
+      uniqueIdentifier: doctor.uniqueIdentifier,
+      fullName: doctor.fullName,
+      specialty: doctor.specialty,
+      generalPractitioner: doctor.generalPractitioner,
+      userId: doctor.userId ?? "",
+    });
+    setError("");
+  }
+
+  async function handleSubmit(event) {
     event.preventDefault();
     setError("");
 
@@ -45,11 +67,28 @@ export function DoctorsPage() {
     };
 
     try {
-      await http.post("/doctors", payload);
+      if (editingId) {
+        await http.put(`/doctors/${editingId}`, payload);
+      } else {
+        await http.post("/doctors", payload);
+      }
+
       setForm(emptyForm);
+      setEditingId(null);
       await loadDoctors();
     } catch (err) {
-      setError(err.response?.data?.message || "Could not create doctor.");
+      setError(getErrorMessage(err, "Could not save doctor."));
+    }
+  }
+
+  async function handleDelete(id) {
+    if (!window.confirm("Delete this doctor?")) return;
+
+    try {
+      await http.delete(`/doctors/${id}`);
+      await loadDoctors();
+    } catch (err) {
+      setError(getErrorMessage(err, "Could not delete doctor."));
     }
   }
 
@@ -60,8 +99,8 @@ export function DoctorsPage() {
       {error && <div className="alert error">{error}</div>}
 
       {hasRole("ADMIN") && (
-        <form className="card form-grid" onSubmit={handleCreate}>
-          <h3>Create doctor</h3>
+        <form className="card form-grid" onSubmit={handleSubmit}>
+          <h3>{editingId ? "Edit doctor" : "Create doctor"}</h3>
 
           <label>
             Unique identifier
@@ -121,9 +160,22 @@ export function DoctorsPage() {
             Can be general practitioner
           </label>
 
-          <button className="button" type="submit">
-            Create
-          </button>
+          <div>
+            <button className="button" type="submit">
+              {editingId ? "Update" : "Create"}
+            </button>
+
+            {editingId && (
+              <button
+                className="button secondary"
+                type="button"
+                onClick={startCreate}
+                style={{ marginLeft: 8 }}
+              >
+                Cancel
+              </button>
+            )}
+          </div>
         </form>
       )}
 
@@ -139,6 +191,7 @@ export function DoctorsPage() {
               <th>Specialty</th>
               <th>GP</th>
               <th>User ID</th>
+              {hasRole("ADMIN") && <th>Actions</th>}
             </tr>
           </thead>
 
@@ -151,6 +204,25 @@ export function DoctorsPage() {
                 <td>{doctor.specialty}</td>
                 <td>{doctor.generalPractitioner ? "Yes" : "No"}</td>
                 <td>{doctor.userId ?? "-"}</td>
+
+                {hasRole("ADMIN") && (
+                  <td>
+                    <button
+                      className="button secondary"
+                      onClick={() => startEdit(doctor)}
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      className="button secondary"
+                      onClick={() => handleDelete(doctor.id)}
+                      style={{ marginLeft: 8 }}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
