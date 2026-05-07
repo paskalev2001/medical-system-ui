@@ -244,3 +244,9 @@ th {
     grid-template-columns: 1fr;
   }
 }
+
+.field-error {
+  color: #991b1b;
+  font-size: 12px;
+  font-weight: 600;
+}

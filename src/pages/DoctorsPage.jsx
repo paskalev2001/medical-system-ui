@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { http } from "../api/http";
 import { useAuth } from "../auth/AuthContext";
 import { getErrorMessage } from "../utils/error";
+import { UserSearchSelect } from "../components/UserSearchSelect";
 
 const emptyForm = {
   uniqueIdentifier: "",
@@ -140,15 +141,17 @@ export function DoctorsPage() {
             </select>
           </label>
 
-          <label>
-            User ID
-            <input
-              name="userId"
-              value={form.userId}
-              onChange={handleChange}
-              placeholder="Optional user id"
+          <UserSearchSelect
+            label="Linked doctor user"
+            role="DOCTOR"
+            value={form.userId}
+            onChange={(userId) =>
+                setForm((prev) => ({
+                ...prev,
+                userId,
+                }))
+            }
             />
-          </label>
 
           <label className="checkbox-row">
             <input

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { http } from "../api/http";
 import { useAuth } from "../auth/AuthContext";
 import { getErrorMessage } from "../utils/error";
+import { UserSearchSelect } from "../components/UserSearchSelect";
 
 const emptyForm = {
   fullName: "",
@@ -144,15 +145,17 @@ export function PatientsPage() {
             </select>
           </label>
 
-          <label>
-            User ID
-            <input
-              name="userId"
-              value={form.userId}
-              onChange={handleChange}
-              placeholder="Optional user id"
+          <UserSearchSelect
+            label="Linked patient user"
+            role="PATIENT"
+            value={form.userId}
+            onChange={(userId) =>
+                setForm((prev) => ({
+                ...prev,
+                userId,
+                }))
+            }
             />
-          </label>
 
           <div>
             <button className="button" type="submit">
