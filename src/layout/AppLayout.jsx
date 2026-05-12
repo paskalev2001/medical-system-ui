@@ -32,6 +32,7 @@ export function AppLayout() {
               <NavLink to="/examinations">Examinations</NavLink>
               <NavLink to="/sick-leaves">Sick Leaves</NavLink>
               <NavLink to="/reports">Reports</NavLink>
+              <NavLink to="/health-insurance-records">Health Insurance</NavLink>
             </>
           )}
 

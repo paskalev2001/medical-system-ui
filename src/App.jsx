@@ -11,6 +11,7 @@ import { ExaminationsPage } from "./pages/ExaminationsPage";
 import { SickLeavesPage } from "./pages/SickLeavesPage";
 import { ReportsPage } from "./pages/ReportsPage";
 import { AdminUsersPage } from "./pages/AdminUsersPage";
+import { HealthInsuranceRecordsPage } from "./pages/HealthInsuranceRecordsPage";
 
 export default function App() {
   return (
@@ -32,6 +33,7 @@ export default function App() {
         <Route path="examinations" element={<ExaminationsPage />} />
         <Route path="sick-leaves" element={<SickLeavesPage />} />
         <Route path="reports" element={<ReportsPage />} />
+        <Route path="health-insurance-records" element={<HealthInsuranceRecordsPage />}/>
 
         <Route
           path="admin/users"
