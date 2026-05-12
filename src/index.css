@@ -256,3 +256,33 @@ th {
   color: #065f46;
   border: 1px solid #a7f3d0;
 }
+
+
+.page-header,
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.report-result {
+  margin-top: 16px;
+  display: grid;
+  gap: 6px;
+}
+
+.report-result strong {
+  font-size: 24px;
+}
+
+.report-result span {
+  color: #6b7280;
+}
+
+.alert.info {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
