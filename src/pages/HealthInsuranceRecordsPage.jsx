@@ -35,7 +35,11 @@ export function HealthInsuranceRecordsPage() {
   }, [records, filterPatientId]);
 
   async function loadRecords() {
-    const response = await http.get("/health-insurance-records");
+    const url = canReadAll
+      ? "/health-insurance-records"
+      : "/health-insurance-records/me";
+
+    const response = await http.get(url);
     setRecords(response.data);
   }
 
@@ -45,11 +49,15 @@ export function HealthInsuranceRecordsPage() {
   }
 
   useEffect(() => {
-    if (!canReadAll) return;
-
-    Promise.all([loadRecords(), loadPatients()]).catch((err) =>
-      setError(getErrorMessage(err, "Could not load health insurance records."))
-    );
+    if (canReadAll) {
+      Promise.all([loadRecords(), loadPatients()]).catch((err) =>
+        setError(getErrorMessage(err, "Could not load health insurance records."))
+      );
+    } else {
+      loadRecords().catch((err) =>
+        setError(getErrorMessage(err, "Could not load health insurance records."))
+      );
+    }
   }, []);
 
   function handleChange(event) {
@@ -182,12 +190,36 @@ export function HealthInsuranceRecordsPage() {
   if (!canReadAll) {
     return (
       <div>
-        <h2>Health Insurance</h2>
+        <h2>My Health Insurance</h2>
+
+        {error && <div className="alert error">{error}</div>}
+
         <div className="card">
-          <p>
-            Patient-specific health insurance view can be added after creating a
-            “my patient profile” endpoint.
-          </p>
+          <h3>My health insurance records</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Month</th>
+                <th>Insured</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {records.map((record) => (
+                <tr key={record.id}>
+                  <td>{record.id}</td>
+                  <td>{record.month}</td>
+                  <td>{record.insured ? "Yes" : "No"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {records.length === 0 && (
+            <p className="muted">No health insurance records found.</p>
+          )}
         </div>
       </div>
     );

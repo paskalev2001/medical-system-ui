@@ -24,7 +24,8 @@ export function SickLeavesPage() {
   const canWrite = hasRole("ADMIN", "DOCTOR");
 
   async function loadSickLeaves() {
-    const response = await http.get("/sick-leaves");
+    const url = canReadAll ? "/sick-leaves" : "/sick-leaves/me";
+    const response = await http.get(url);
     setSickLeaves(response.data);
   }
 
@@ -34,11 +35,15 @@ export function SickLeavesPage() {
   }
 
   useEffect(() => {
-    if (!canReadAll) return;
-
-    Promise.all([loadSickLeaves(), loadExaminations()]).catch((err) =>
-      setError(getErrorMessage(err, "Could not load sick leaves."))
-    );
+    if (canReadAll) {
+      Promise.all([loadSickLeaves(), loadExaminations()]).catch((err) =>
+        setError(getErrorMessage(err, "Could not load sick leaves."))
+      );
+    } else {
+      loadSickLeaves().catch((err) =>
+        setError(getErrorMessage(err, "Could not load sick leaves."))
+      );
+    }
   }, []);
 
   function handleChange(event) {
@@ -129,11 +134,37 @@ export function SickLeavesPage() {
     return (
       <div>
         <h2>My Sick Leaves</h2>
+
+        {error && <div className="alert error">{error}</div>}
+
         <div className="card">
-          <p>
-            Patient-specific sick leave view will be connected after adding a
-            “my patient profile” endpoint.
-          </p>
+          <h3>My sick leaves</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Examination</th>
+                <th>Start date</th>
+                <th>Days</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {sickLeaves.map((sickLeave) => (
+                <tr key={sickLeave.id}>
+                  <td>{sickLeave.id}</td>
+                  <td>#{sickLeave.examinationId}</td>
+                  <td>{sickLeave.startDate}</td>
+                  <td>{sickLeave.numberOfDays}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {sickLeaves.length === 0 && (
+            <p className="muted">No sick leaves found.</p>
+          )}
         </div>
       </div>
     );

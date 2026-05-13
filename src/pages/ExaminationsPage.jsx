@@ -29,7 +29,8 @@ export function ExaminationsPage() {
   const canWrite = hasRole("ADMIN", "DOCTOR");
 
   async function loadExaminations() {
-    const response = await http.get("/examinations");
+    const url = canReadAll ? "/examinations" : "/examinations/me";
+    const response = await http.get(url);
     setExaminations(response.data);
   }
 
@@ -60,21 +61,16 @@ export function ExaminationsPage() {
   }
 
   useEffect(() => {
-    if (!canReadAll) return;
-
-    Promise.all([loadExaminations(), loadDropdownData()]).catch((err) =>
-      setError(getErrorMessage(err, "Could not load examinations."))
-    );
+    if (canReadAll) {
+      Promise.all([loadExaminations(), loadDropdownData()]).catch((err) =>
+        setError(getErrorMessage(err, "Could not load examinations."))
+      );
+    } else {
+      loadExaminations().catch((err) =>
+        setError(getErrorMessage(err, "Could not load examinations."))
+      );
+    }
   }, []);
-
-  function handleChange(event) {
-    const { name, value } = event.target;
-
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  }
 
   function startCreate() {
     setEditingId(null);
@@ -146,11 +142,43 @@ export function ExaminationsPage() {
     return (
       <div>
         <h2>My Examinations</h2>
+
+        {error && <div className="alert error">{error}</div>}
+
         <div className="card">
-          <p>
-            Patient-specific examination view will be connected after adding a
-            “my patient profile” endpoint.
-          </p>
+          <h3>My examination history</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Doctor</th>
+                <th>Diagnosis</th>
+                <th>Price</th>
+                <th>Paid by</th>
+                <th>Treatment</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {examinations.map((examination) => (
+                <tr key={examination.id}>
+                  <td>{examination.id}</td>
+                  <td>{examination.examinationDate}</td>
+                  <td>{examination.doctor?.fullName ?? "-"}</td>
+                  <td>{examination.diagnosis?.name ?? "-"}</td>
+                  <td>{examination.price}</td>
+                  <td>{examination.paymentType}</td>
+                  <td>{examination.prescribedTreatment}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {examinations.length === 0 && (
+            <p className="muted">No examinations found.</p>
+          )}
         </div>
       </div>
     );
